@@ -1,0 +1,25 @@
+name: Pronto
+on:
+  pull_request:
+    types: [opened, synchronize]
+jobs:
+  eslint_npm:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      statuses: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+          cache: 'yarn'
+      - name: yarn install
+        run: yarn install
+      - name: pronto run
+        uses: HeRoMo/pronto-action@v1.61.0
+        with:
+          runner: eslint_npm
