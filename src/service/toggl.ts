@@ -1,7 +1,5 @@
-// noinspection LanguageDetectionInspection
-
-import Props from './props';
-import Utils from './utils';
+import Props from '../props';
+import Utils from '../utils';
 
 const TOGGL_API_TOKEN: string = 'TOGGL_API_TOKEN';
 

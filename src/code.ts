@@ -1,4 +1,4 @@
-import Toggl from './toggl';
+import Toggl from './service/toggl';
 import Props from './props';
 
 const APP_NAME = 'Toggl2freee';
