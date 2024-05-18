@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <base target="_top">
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+  <style type="text/css">
+    #workspaces-load {
+      display: none;
+    }
+    #workspaces-load.error {
+      display: block;
+    }
+    .fullwidth { width: 100% }
+    .loading {
+      display: none;
+      margin-top: 3px;
+      width: 12px;
+      height: 12px;
+      border: 3px solid rgba(255,255,255,0.4);
+      border-top-color: rgba(255,255,255,0.9);
+      border-radius: 50%;
+      animation: spin 1.2s linear 0s infinite;
+    }
+    @keyframes spin {
+      0% {transform: rotate(0deg);}
+      100% {transform: rotate(360deg);}
+    }
+    button.processing .loading {
+      display: inline-block;
+    }
+    button.processing span {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar branding-below">
+  <button id="setting" class="fullwidth <?=function(){if(hasInvalidProps()) return 'red'}()?>" style="width: 100%">設定</button>
+  <fieldset>
+    <legend>Toggl</legend>
+    <div class="block form-group">
+      <label for="workspace">Workspace: </label>
+      <select id="workspace"></select>
+    </div>
+    <div id="workspaces-load" class="block form-group">
+      <button>Workspaceを取得</button>
+    </div>
+    <div class="block form-group">
+      <? var ym = Utils.getYearMonths() ?>
+      <label for="year-month">年月: </label>
+      <select id="year-month">
+        <? for(var i = 0; i<ym.length; i++){ ?>
+        <option value="<?= ym[i] ?>"><?= ym[i] ?></option>
+        <? } ?>
+      </select>
+    </div>
+<!--    <div class="block form-group">-->
+<!--      <div>-->
+<!--        <input type="radio" name="ticket-only" id="all-data" value="false" >-->
+<!--        <label for="all-data">すべて取得</label>-->
+<!--      </div>-->
+<!--      <div>-->
+<!--        <input type="radio" name="ticket-only" id="ticket-only" value="true"  checked>-->
+<!--        <label for="ticket-only">チケットIDありのみ</label>-->
+<!--      </div>-->
+<!--    </div>-->
+    <div class="block form-group">
+      <button id="fetchTime" class="fullwidth blue">
+        <span>読み出し</span>
+        <div class="loading"></div>
+      </button>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>freee 工数管理</legend>
+    <div class="block form-group">
+      <button id="freeeLogin" class="fullwidth blue">
+        <span>ログイン</span>
+        <div class="loading"></div>
+      </button>
+    </div>
+    <div class="block form-group">
+      <button id="entryTime" class="fullwidth blue">
+        <span>工数を登録</span>
+        <div class="loading"></div>
+      </button>
+    </div>
+  </fieldset>
+</div>
+<script type="text/javascript">
+  (function(){
+    function loadWorkspaces(){
+      function onSuccess(workspaces){
+        document.querySelector('#workspaces-load').classList.remove('error');
+        const fragment = document.createDocumentFragment();
+        for(const workspace of workspaces){
+          const option = document.createElement('option');
+          option.value = workspace.id;
+          option.textContent = workspace.name;
+          fragment.appendChild(option)
+        }
+        const selectWorkspace = document.querySelector('select#workspace');
+        selectWorkspace.appendChild(fragment);
+      }
+      function onFailure(error){
+        const message = 'Workspaceの取得でエラーが発生しました。TogglのAPIキーを設定して下さい。'
+        showErrorDialog(message, error);
+        document.querySelector('#workspaces-load').classList.add('error');
+        document.querySelector('button#setting').classList.add('red');
+      }
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .getWorkspaces();
+    }
+    document.addEventListener('DOMContentLoaded', loadWorkspaces);
+    document.querySelector('#workspaces-load').addEventListener('click', loadWorkspaces);
+
+    function setProcessing(target){
+      target.classList.add('processing');
+      target.disabled=true;
+    }
+
+    function unsetProcessing(target){
+      target.classList.remove('processing')
+      target.disabled=false;
+    }
+
+    document.querySelector('button#setting').addEventListener('click', function(event){
+      function onSuccess(){
+        event.target.classList.remove('red');
+      }
+      function onFailure(error){
+        const message = '設定ウィンドウの表示でエラーが発生しました。';
+        showErrorDialog(message, error)
+      }
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .showSettingDialog();
+    })
+
+    document.querySelector('button#fetchTime').addEventListener('click', function(event){
+      const target = event.currentTarget;
+      setProcessing(target);
+      function onSuccess(){
+        unsetProcessing(target);
+      }
+      function onFailure(error){
+        const message = 'Toggl からのデータ取得でエラーが発生しました。';
+        showErrorDialog(message, error);
+        unsetProcessing(target);
+      }
+      const workspaceId = document.querySelector('select#workspace').value;
+      const yearMonth = document.querySelector('select#year-month').value.split('-');
+      // const ticketOnly = document.querySelector('input#ticket-only').checked
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .fillSheetWithReport(workspaceId, yearMonth[0], yearMonth[1]);
+    })
+
+    document.querySelector('button#freeeLogin').addEventListener('click', function(event){
+      const target = event.currentTarget;
+      setProcessing(target);
+      function onSuccess(){
+        unsetProcessing(target);
+      }
+      function onFailure(error){
+        const message = 'freeeへのログインでエラーが発生しました。'
+        showErrorDialog(message, error);
+        unsetProcessing(target);
+      }
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .freeeLogin();
+    })
+
+    document.querySelector('button#entryTime').addEventListener('click', function(event){
+      const target = event.currentTarget;
+      setProcessing(target);
+      function onSuccess(){
+        unsetProcessing(target);
+      }
+      function onFailure(error){
+        const message = 'freeeへの工数登録でエラーが発生しました。'
+        showErrorDialog(message, error);
+        unsetProcessing(target);
+      }
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .addTimeEntryFromSheet();
+    })
+
+    function showErrorDialog(message, error){
+      console.log(error);
+      if(error) message+= ': ' + error.name + '\n' + error.message;
+      google.script.run
+        .withFailureHandler(function(e){ alert(message) })
+        .showError(message);
+    }
+  })()
+</script>
+</body>
+</html>
