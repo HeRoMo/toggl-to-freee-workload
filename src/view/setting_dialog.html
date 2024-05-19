@@ -49,6 +49,9 @@
       event.currentTarget.disabled=true;
       var props = {}
       var settings = document.querySelectorAll("input.setting")
+      settings.forEach(function(setting){
+        props[setting.id] = setting.value;
+      })
       function onSuccess(){
         google.script.host.close();
       }

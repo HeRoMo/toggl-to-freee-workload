@@ -1,4 +1,5 @@
 import Toggl from './service/toggl';
+import Freee from './service/freee';
 import Props from './props';
 
 const APP_NAME = 'Toggl2freee';
@@ -27,7 +28,7 @@ function onInstall(): void { // eslint-disable-line @typescript-eslint/no-unused
  * サイドバー表示
  */
 function showSidebar(): void {  // eslint-disable-line @typescript-eslint/no-unused-vars
-  const sidebarTmpl = HtmlService.createTemplateFromFile('sidebar');
+  const sidebarTmpl = HtmlService.createTemplateFromFile('view/sidebar');
   const sidebar = sidebarTmpl.evaluate();
   sidebar.setSandboxMode(HtmlService.SandboxMode.IFRAME);
   sidebar.setTitle(APP_NAME);
@@ -38,7 +39,7 @@ function showSidebar(): void {  // eslint-disable-line @typescript-eslint/no-unu
  * 設定ダイアログ表示
  */
 function showSettingDialog(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
-  const template = HtmlService.createTemplateFromFile('setting_dialog');
+  const template = HtmlService.createTemplateFromFile('view/setting_dialog');
   const dialog = template.evaluate();
   dialog.setWidth(400).setHeight(450);
   const ui = SpreadsheetApp.getUi();
