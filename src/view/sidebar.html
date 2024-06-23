@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <title>toggl to freee workload</title>
   <base target="_top">
   <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
   <style type="text/css">
@@ -55,16 +56,12 @@
         <? } ?>
       </select>
     </div>
-<!--    <div class="block form-group">-->
-<!--      <div>-->
-<!--        <input type="radio" name="ticket-only" id="all-data" value="false" >-->
-<!--        <label for="all-data">すべて取得</label>-->
-<!--      </div>-->
-<!--      <div>-->
-<!--        <input type="radio" name="ticket-only" id="ticket-only" value="true"  checked>-->
-<!--        <label for="ticket-only">チケットIDありのみ</label>-->
-<!--      </div>-->
-<!--    </div>-->
+    <div class="block form-group">
+      <button id="togglProjectTag" class="fullwidth blue">
+        <span>プロジェクト・タグを出力する</span>
+        <div class="loading"></div>
+      </button>
+    </div>
     <div class="block form-group">
       <button id="fetchTime" class="fullwidth blue">
         <span>読み出し</span>
@@ -78,6 +75,16 @@
     <div class="block form-group">
       <button id="freeeLogin" class="fullwidth blue">
         <span>ログイン</span>
+        <div class="loading"></div>
+      </button>
+    </div>
+    <div class="block form-group">
+      <label for="company">Company: </label>
+      <select id="company"></select>
+    </div>
+    <div class="block form-group">
+      <button id="freeeProjectTags" class="fullwidth blue">
+        <span>プロジェクト・タグを出力</span>
         <div class="loading"></div>
       </button>
     </div>
@@ -117,6 +124,31 @@
     }
     document.addEventListener('DOMContentLoaded', loadWorkspaces);
     document.querySelector('#workspaces-load').addEventListener('click', loadWorkspaces);
+
+    function loadCompanies(){
+      function onSuccess(companies){
+        console.log({companies});
+        const fragment = document.createDocumentFragment();
+        for(const company of companies){
+          const option = document.createElement('option');
+          option.value = company.id;
+          option.textContent = company.name;
+          fragment.appendChild(option);
+        }
+        const selectCompany = document.querySelector('select#company');
+        selectCompany.appendChild(fragment);
+      }
+      function onFailure(error){
+        const message = 'Companyの取得でエラーが発生しました。freeeへのログインを設定して下さい。';
+        showErrorDialog(message, error);
+      }
+
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .getCompanies();
+    }
+    document.addEventListener('DOMContentLoaded', loadCompanies);
 
     function setProcessing(target){
       target.classList.add('processing');
@@ -179,6 +211,42 @@
         .freeeLogin();
     })
 
+    document.querySelector('button#togglProjectTag').addEventListener('click', function(event){
+      const target = event.currentTarget;
+      setProcessing(target);
+      function onSuccess(){
+        unsetProcessing(target);
+      }
+      function onFailure(error){
+        const message = 'toggl のプロジェクト・タグでエラーが発生しました';
+        showErrorDialog(message, error);
+        unsetProcessing(target);
+      }
+      const workspaceId = document.querySelector('select#workspace').value;
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .outputTogglProjectTags(workspaceId);
+    });
+
+    document.querySelector('button#freeeProjectTags').addEventListener('click', function(event){
+      const target = event.currentTarget;
+      setProcessing(target);
+      function onSuccess(){
+        unsetProcessing(target);
+      }
+      function onFailure(error){
+        const message = 'freee のプロジェクト・タグでエラーが発生しました';
+        showErrorDialog(message, error);
+        unsetProcessing(target);
+      }
+      const companyId = document.querySelector('select#company').value;
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .outputFreeeProjectTags(companyId);
+    })
+
     document.querySelector('button#entryTime').addEventListener('click', function(event){
       const target = event.currentTarget;
       setProcessing(target);
@@ -190,10 +258,11 @@
         showErrorDialog(message, error);
         unsetProcessing(target);
       }
+      const companyId = document.querySelector('select#company').value;
       google.script.run
         .withSuccessHandler(onSuccess)
         .withFailureHandler(onFailure)
-        .addTimeEntryFromSheet();
+        .addTimeEntryFromSheet(companyId);
     })
 
     function showErrorDialog(message, error){

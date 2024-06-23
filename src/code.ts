@@ -1,5 +1,6 @@
-import Toggl from './service/toggl';
-import Freee from './service/freee';
+import {TogglClazz} from './service/toggl';
+import Freee, {FreeeClazz} from './service/freee';
+import SpreadsheetUtils from './SpreadsheetUtils';
 import Props from './props';
 
 const APP_NAME = 'Toggl2freee';
@@ -14,6 +15,13 @@ function onOpen(): void {
   addon.addItem('サイドバーを表示', 'showSidebar');
   addon.addItem('設定', 'showSettingDialog');
   addon.addToUi();
+
+  // // TODO: 削除
+  // SpreadsheetApp.getUi()
+  //   .createMenu('freee API連携')
+  //   .addItem('認可処理', 'Freee.showAuth')
+  //   .addItem('ログアウト', 'Freee.logout')
+  //   .addToUi();
 }
 
 /**
@@ -52,7 +60,8 @@ function showSettingDialog(): void { // eslint-disable-line @typescript-eslint/n
  */
 function getWorkspaces(): Array<{id: number, name: string}> { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
-    return Toggl.getWorkspaces();
+    const toggl = new TogglClazz(Props.get('TOGGL_API_TOKEN'));
+    return toggl.getWorkspaces();
   } catch (error) {
     const user = Session.getTemporaryActiveUserKey();
     const message = 'Togglのワークスペース取得でエラーが発生しました。';
@@ -87,7 +96,8 @@ function fillSheetWithReport( // eslint-disable-line @typescript-eslint/no-unuse
   month: number,
 ) {
   try {
-    const report = Toggl.getAllReport(workplaceId, year, month);
+    const toggl = new TogglClazz(Props.get('TOGGL_API_TOKEN'));
+    const report = toggl.getAllReport(workplaceId, year, month);
     const totalCount = Math.max(report.length - 1, 0); // ヘッダ行を引いておく
     const count = Math.max(report.length - 1, 0); // ヘッダ行を引いておく
     console.info({ message: `Togglから ${count} 件取得しました`, totalCount, count });
@@ -102,13 +112,84 @@ function fillSheetWithReport( // eslint-disable-line @typescript-eslint/no-unuse
 }
 
 function freeeLogin(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
-  const ui = SpreadsheetApp.getUi();
-  ui.alert('INFO', 'TODO: implements', ui.ButtonSet.OK);
+  Freee.showAuth();
 }
 
-function addTimeEntryFromSheet(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
-  const ui = SpreadsheetApp.getUi();
-  ui.alert('INFO', 'TODO: implements', ui.ButtonSet.OK);
+function outputTogglProjectTags(workplaceId: number): void { // eslint-disable-line @typescript-eslint/no-unused-vars
+  try {
+    const toggl = new TogglClazz(Props.get('TOGGL_API_TOKEN'));
+    const tags = toggl.getTags(workplaceId);
+    const projects = toggl.getProjects(workplaceId);
+    const activeSpreadSheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheetName = 'TOGGL_PROJECTS_TAGS';
+    const ss = new SpreadsheetUtils(activeSpreadSheet.getId());
+    const projectData = Object.keys(projects).map((id) => [id, projects[id]]);
+    projectData.unshift(['togglProjectId', 'togglProjectName']);
+    projectData.push(['', '']);
+    const tagData = Object.keys(tags).map((id) => [id, tags[id]]);
+    tagData.unshift(['togglTagId', 'togglTagName']);
+    const outputData = projectData.concat(tagData);
+    ss.writeToSheet(sheetName, outputData);
+
+    activeSpreadSheet.toast(`${sheetName} を出力しました`);
+  } catch (error) {
+    const user = Session.getTemporaryActiveUserKey();
+    const message = 'Togglのプロジェクト・タグのデータの読み出しでエラーが発生しました。';
+    console.error({ user, message, error });
+    throw new Error(`${message} \n[${user}]`);
+  }
+}
+
+function getCompanies(): Array<{id: number, name: string}> { // eslint-disable-line @typescript-eslint/no-unused-vars
+  try {
+    const freee = new FreeeClazz();
+    const companies = freee.getCompanies();
+    return companies;
+  } catch (error) {
+    const user = Session.getTemporaryActiveUserKey();
+    const message = 'freeeの会社情報取得でエラーが発生しました。';
+    console.error({ user, message, error });
+    throw new Error(`${message} \n[${user}]`);
+  }
+
+}
+
+/**
+ *
+ * @param companyId
+ */
+function outputFreeeProjectTags(companyId: number): void { // eslint-disable-line @typescript-eslint/no-unused-vars
+  try {
+    const freee = new FreeeClazz();
+    const activeSpreadSheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheetName = 'FREEE_PROJECTS_TAGS';
+    const ss = new SpreadsheetUtils(activeSpreadSheet.getId());
+    const output = freee.getProjectsTags(companyId);
+    ss.writeToSheet(sheetName, output);
+
+    activeSpreadSheet.toast(`${sheetName} を出力しました`);
+  } catch (error) {
+    const user = Session.getTemporaryActiveUserKey();
+    const message = 'freee のプロジェクト・タグのデータの読み出しでエラーが発生しました。';
+    console.log({error: error});
+    throw new Error(`${message} \n[${user}]`);
+  }
+}
+
+function addTimeEntryFromSheet(companyId: number): void { // eslint-disable-line @typescript-eslint/no-unused-vars
+  try {
+    const freee = new FreeeClazz();
+    const sheetName = SpreadsheetApp.getActiveSheet().getName();
+    const count = freee.entryWorkloads(companyId, sheetName);
+
+    const activeSpreadSheet = SpreadsheetApp.getActiveSpreadsheet();
+    activeSpreadSheet.toast(`freee 工数管理に ${count} 件を登録しました`);
+  } catch (error) {
+    const user = Session.getTemporaryActiveUserKey();
+    const message = 'freee 工数管理の登録でエラーが発生しました。';
+    console.log({error: error});
+    throw new Error(`${message} \n[${user}]`);
+  }
 }
 
 /**
