@@ -22,7 +22,10 @@ export default [
   {ignores: ['src/appsscript.json']},
   {
     languageOptions: {
-      globals: {...globals.node}
+      globals: {
+        OAuth2: 'readonly',
+        ...globals.node,
+      },
     },
     settings: {
       node: {
@@ -73,7 +76,9 @@ export default [
       'import/newline-after-import': 0,
       'import/no-mutable-exports': 0,
       'import/extensions': ['error', 'ignorePackages', {ts: 'never', js: 'never'}],
-      '@/max-len': ['error', {code: 100, ignoreTrailingComments: true}],
+      '@/max-len': ['error', {code: 120, ignoreTrailingComments: true}],
+      '@/comma-dangle': ['error', 'always-multiline'],
+      '@/semi': 'error',
     },
   },
 ];
