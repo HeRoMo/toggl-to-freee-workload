@@ -1,4 +1,4 @@
-class SpreadsheetUtils {
+export class SpreadsheetUtils {
   private ss: GoogleAppsScript.Spreadsheet.Spreadsheet;
 
   /**
@@ -25,6 +25,23 @@ class SpreadsheetUtils {
       return row;
     });
     return json;
+  }
+
+  public writeToSheet(sheetName: string, data: any[][]): void {
+    const sheet = this.getOrInsertSheet(sheetName, 0);
+    sheet.getDataRange().clear();
+    const rowCount = data.length;
+    const columnCount = data[0].length;
+    const range = sheet.getRange(1,1,rowCount, columnCount);
+    range.setValues(data);
+  }
+
+  public getOrInsertSheet(name: string, index: number): GoogleAppsScript.Spreadsheet.Sheet {
+   let sheet = this.ss.getSheetByName(name);
+   if (sheet == null){
+     sheet = this.ss.insertSheet(name, index);
+   }
+   return sheet;
   }
 }
 
