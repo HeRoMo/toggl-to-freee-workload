@@ -83,7 +83,7 @@ export class TogglClazz {
    * @param month       レポートを取得する月
    * @return [タスクID, プロジェクトID, 日付, 時間（分）, タグIDのリスト, タスク詳細]の配列
    */
-  public getAllReport(workplaceId: number, year: number, month: number): any[][] {
+  public getAllReport(workplaceId: number, year: number, month: number): any[][] { // eslint-disable-line @typescript-eslint/no-explicit-any
     const period = Utils.getPeriod(year, month);
     const reportJson = this.fetchAllReport(workplaceId, period.since, period.until);
     const projects = this.getProjects(workplaceId);
@@ -163,7 +163,7 @@ export class TogglClazz {
     reportJson: IToggleReportData[],
     projects: {[key: number]: string},
     tags: {[key: number]: string},
-  ): any[][] {
+  ): any[][] { // eslint-disable-line @typescript-eslint/no-explicit-any
     const tfMap = this.readTogglFreeeMap();
     const parsedReport = reportJson.map((report) => {
       const togglId = report.time_entries[0].id;
@@ -229,7 +229,7 @@ export class TogglClazz {
 }
 
 class TogglFreeeMap {
-  private readonly tfMap: {[key: number]: {[key: number]: any[]}};
+  private readonly tfMap: {[key: number]: {[key: number]: any[]}}; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   constructor(data: object[]) {
     const tfMap = {};
@@ -252,7 +252,7 @@ class TogglFreeeMap {
     this.tfMap = tfMap;
   }
 
-  public getFreeeProjectTag(toggleProjectId: number, toggleTagIds: number[]): any[] {
+  public getFreeeProjectTag(toggleProjectId: number, toggleTagIds: number[]): any[] { // eslint-disable-line @typescript-eslint/no-explicit-any
     const tagMap = this.tfMap[toggleProjectId];
     if (tagMap == null) {
       return ['', '', '', '', '', ''];
@@ -268,12 +268,12 @@ class TogglFreeeMap {
     return ['', '', '', '', '', ''];
   }
 
-  public get(toggleProjectId: number): {[key: number]: any[]} {
+  public get(toggleProjectId: number): {[key: number]: any[]} { // eslint-disable-line @typescript-eslint/no-explicit-any
     return this.tfMap[toggleProjectId];
   }
 }
 
-function Test(): void {
+function Test(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
   const toggl = new TogglClazz(Props.get(TOGGL_API_TOKEN));
   // const tags = toggl.getTags(218985);
   // // const tags = Toggl.getTags(218985);

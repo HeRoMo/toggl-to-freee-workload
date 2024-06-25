@@ -154,7 +154,7 @@ export class FreeeClazz {
     return projects;
   }
 
-  public getProjectsTags(companyId: number): any[][] {
+  public getProjectsTags(companyId: number): any[][] { // eslint-disable-line @typescript-eslint/no-explicit-any
     const projects = this.getProjects(companyId);
     const projectTags = projects.map((project)=>{
       return this.parseProject(project);
@@ -184,7 +184,7 @@ export class FreeeClazz {
     return output;
   }
 
-  private parseProject(project: FreeeProject): any[][] {
+  private parseProject(project: FreeeProject): any[][] { // eslint-disable-line @typescript-eslint/no-explicit-any
     console.log(`${project.id}: ${project.name}`);
     const projectId = project.id;
     const projectName = project.name;
@@ -299,20 +299,7 @@ export class FreeeClazz {
   }
 }
 
-
-//----------------------------------------------------------------
-// const freeeService_ = getFreeeService();
-// function getFreeeService() {
-//   return OAuth2.createService('freeeAPI')
-//     .setAuthorizationBaseUrl ('https://accounts.secure.freee.co.jp/public_api/authorize')
-//     .setTokenUrl('https://accounts.secure.freee.co.jp/public_api/token')
-//     .setClientId(Props.get('FREEE_CLIENT_ID'))
-//     .setClientSecret(Props.get('FREEE_CLIENT_SECRET'))
-//     .setCallbackFunction ('authCallback')
-//     .setPropertyStore (PropertiesService.getUserProperties());
-// }
-
-function authCallback(request) { // eslint-disable-line @typescript-eslint/no-unused-vars
+function authCallback(request: object) { // eslint-disable-line @typescript-eslint/no-unused-vars
   const freee = new FreeeClazz();
   const isAuthorized = freee.service.handleCallback(request);
   if (isAuthorized) {
@@ -330,7 +317,7 @@ const Freee = {
     SpreadsheetApp.getUi().showModelessDialog(htmlOutput, title);
   },
 
-  showAuth(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
+  showAuth(): void {
     const freee = new FreeeClazz();
     if (!freee.service.hasAccess()) {
       const authorizationUrl = freee.service.getAuthorizationUrl();
@@ -354,7 +341,7 @@ const Freee = {
     Browser.msgBox('OAuth認可済みです。\\n認可されたユーザー名：' + user.display_name);
   },
 
-  logout(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
+  logout(): void {
     const freee = new FreeeClazz();
     freee.logout();
     const mes = 'freeeアプリからログアウトしました。';
@@ -366,21 +353,21 @@ const Freee = {
 
 export default Freee;
 
-function TestUser():void {
+function TestUser_():void { // eslint-disable-line @typescript-eslint/no-unused-vars
   // const user = Freee.getUser();
   const freee = new FreeeClazz();
   const user = freee.getUser();
   console.log({user});
 }
 
-function TestCompanies():void {
+function TestCompanies():void { // eslint-disable-line @typescript-eslint/no-unused-vars
   // const user = Freee.getUser();
   const freee = new FreeeClazz();
   const companies = freee.getCompanies();
   console.log({companies});
 }
 
-function TestProj(): void {
+function TestProj(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
   const freee = new FreeeClazz();
   const companyId = 111111;
   const projectsTags = freee.getProjectsTags(companyId);
@@ -395,20 +382,20 @@ function TestProj(): void {
   // console.log(JSON.stringify(proj, null, 2));
 }
 
-function TestEntryWL() {
-  const entry: FreeeWorkloadInput = {
-    company_id: 111111,
-    project_id: 222222,
-    date: '2024-05-24',
-    minutes: 9,
-    memo: '作業内容',
-    // workload_tags: [{
-    //   tag_group_id: 1,
-    //   tag_id: 1,
-    // }],
-  };
-
-  const freee = new FreeeClazz();
-  const workload = freee.entryWorkload(entry);
-  console.log({workload});
-}
+// function TestEntryWL() { // eslint-disable-line @typescript-eslint/no-unused-vars
+//   const entry: FreeeWorkloadInput = {
+//     company_id: 111111,
+//     project_id: 222222,
+//     date: '2024-05-24',
+//     minutes: 9,
+//     memo: '作業内容',
+//     // workload_tags: [{
+//     //   tag_group_id: 1,
+//     //   tag_id: 1,
+//     // }],
+//   };
+//
+//   const freee = new FreeeClazz();
+//   const workload = freee.entryWorkload(entry);
+//   console.log({workload});
+// }
