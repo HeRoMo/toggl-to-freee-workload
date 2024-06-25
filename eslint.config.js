@@ -19,7 +19,10 @@ export default [
   ),
   pluginJs.configs.recommended,
   ...tsESLint.configs.recommended,
-  {ignores: ['src/appsscript.json']},
+  {ignores: [
+      'src/appsscript.json',
+      'src/view/*',
+    ]},
   {
     languageOptions: {
       globals: {
@@ -62,7 +65,7 @@ export default [
     },
     languageOptions: {
       globals: {
-        ...globals.googleAppsScript,
+        ...googleAppsScriptPlugin.environments.googleappsscript.globals,
         ...globals.jest,
       },
       parser: tsESLintParser,

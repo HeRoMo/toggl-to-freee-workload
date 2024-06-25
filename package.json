@@ -4,7 +4,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "eslint": "./node_modules/.bin/eslint ./src/**/* ./__tests__/**/*",
+    "eslint": "./node_modules/.bin/eslint ./src/**/* ./__tests__/**/* --no-warn-ignored",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "clasp": "./node_modules/.bin/clasp",
