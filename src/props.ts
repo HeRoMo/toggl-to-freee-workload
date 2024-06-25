@@ -8,7 +8,7 @@ const Props = {
     return userProperties.getProperty(key);
   },
 
-  getAll(): object {
+  getAll(): {[p: string]: string} {
     return userProperties.getProperties();
   },
 
