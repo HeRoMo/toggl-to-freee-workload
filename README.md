@@ -68,3 +68,7 @@ $ yarn test
 ## LICENSE
 
 [MIT](./LICENSE)
+
+## libs
+
+- [GitHub - googleworkspace/apps-script-oauth2: An OAuth2 library for Google Apps Script.](https://github.com/googleworkspace/apps-script-oauth2)
