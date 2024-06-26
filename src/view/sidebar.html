@@ -59,13 +59,13 @@
     <div class="block form-group">
       <button id="togglProjectTag" class="fullwidth blue">
         <span>プロジェクト・タグを出力する</span>
-        <div class="loading"></div>
+        <span class="loading"></span>
       </button>
     </div>
     <div class="block form-group">
       <button id="fetchTime" class="fullwidth blue">
         <span>読み出し</span>
-        <div class="loading"></div>
+        <span class="loading"></span>
       </button>
     </div>
   </fieldset>
@@ -75,7 +75,13 @@
     <div class="block form-group">
       <button id="freeeLogin" class="fullwidth blue">
         <span>ログイン</span>
-        <div class="loading"></div>
+        <span class="loading"></span>
+      </button>
+    </div>
+    <div class="block form-group">
+      <button id="freeeLogout" class="fullwidth blue">
+        <span>ログアウト</span>
+        <span class="loading"></span>
       </button>
     </div>
     <div class="block form-group">
@@ -84,14 +90,14 @@
     </div>
     <div class="block form-group">
       <button id="freeeProjectTags" class="fullwidth blue">
-        <span>プロジェクト・タグを出力</span>
-        <div class="loading"></div>
+        <span>プロジェクト・タグを出力する</span>
+        <span class="loading"></span>
       </button>
     </div>
     <div class="block form-group">
       <button id="entryTime" class="fullwidth blue">
         <span>工数を登録</span>
-        <div class="loading"></div>
+        <span class="loading"></span>
       </button>
     </div>
   </fieldset>
@@ -181,7 +187,7 @@
         unsetProcessing(target);
       }
       function onFailure(error){
-        const message = 'Toggl からのデータ取得でエラーが発生しました。';
+        const message = 'toggl からのデータ取得でエラーが発生しました。';
         showErrorDialog(message, error);
         unsetProcessing(target);
       }
@@ -201,7 +207,7 @@
         unsetProcessing(target);
       }
       function onFailure(error){
-        const message = 'freeeへのログインでエラーが発生しました。'
+        const message = 'freee へのログインでエラーが発生しました。'
         showErrorDialog(message, error);
         unsetProcessing(target);
       }
@@ -209,6 +215,23 @@
         .withSuccessHandler(onSuccess)
         .withFailureHandler(onFailure)
         .freeeLogin();
+    })
+
+    document.querySelector('button#freeeLogout').addEventListener('click', function(event){
+      const target = event.currentTarget;
+      setProcessing(target);
+      function onSuccess(){
+        unsetProcessing(target);
+      }
+      function onFailure(error){
+        const message = 'freee へのログアウトでエラーが発生しました。'
+        showErrorDialog(message, error);
+        unsetProcessing(target);
+      }
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .freeeLogout();
     })
 
     document.querySelector('button#togglProjectTag').addEventListener('click', function(event){

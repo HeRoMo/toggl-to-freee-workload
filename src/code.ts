@@ -1,9 +1,9 @@
 import {TogglClazz} from './service/toggl';
-import Freee, {FreeeClazz} from './service/freee';
+import {FreeeClazz} from './service/freee';
 import SpreadsheetUtils from './SpreadsheetUtils';
 import Props from './props';
 
-const APP_NAME = 'Toggl2freee';
+const APP_NAME = 'toggl to freee';
 
 /**
  * スプレッドシートのオープンイベント処理
@@ -15,13 +15,6 @@ function onOpen(): void {
   addon.addItem('サイドバーを表示', 'showSidebar');
   addon.addItem('設定', 'showSettingDialog');
   addon.addToUi();
-
-  // // TODO: 削除
-  // SpreadsheetApp.getUi()
-  //   .createMenu('freee API連携')
-  //   .addItem('認可処理', 'Freee.showAuth')
-  //   .addItem('ログアウト', 'Freee.logout')
-  //   .addToUi();
 }
 
 /**
@@ -101,7 +94,7 @@ function fillSheetWithReport( // eslint-disable-line @typescript-eslint/no-unuse
     const totalCount = Math.max(report.length - 1, 0); // ヘッダ行を引いておく
     const count = Math.max(report.length - 1, 0); // ヘッダ行を引いておく
     console.info({ message: `Togglから ${count} 件取得しました`, totalCount, count });
-    SpreadsheetApp.getActiveSpreadsheet().toast(`Success ${count}件取得しました`, 'Toggl');
+    SpreadsheetApp.getActiveSpreadsheet().toast(`Success ${count}件取得しました`, 'toggl');
     writeToSheet(report);
   } catch (error) {
     const user = Session.getTemporaryActiveUserKey();
@@ -111,10 +104,39 @@ function fillSheetWithReport( // eslint-disable-line @typescript-eslint/no-unuse
   }
 }
 
+/**
+ * freee にログインする
+ */
 function freeeLogin(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
-  Freee.showAuth();
+  const freee = new FreeeClazz();
+  if (!freee.inLogin()) {
+    const authorizationUrl = freee.getAuthorizationUrl();
+    const template = HtmlService.createTemplate(
+      '<a href="<?= authorizationUrl ?>" target="_blank">freee の認証ページを開く</a>. ',
+    );
+    template.authorizationUrl = authorizationUrl;
+    const title = 'freeeアプリの認可処理';
+    const content = template.evaluate();
+    createModelessDialog(title, content);
+  } else {
+    const user = freee.getUser();
+    SpreadsheetApp.getActiveSpreadsheet().toast(`OAuth認可済みです。認可されたユーザー名：${user.display_name}`, 'freee');
+  }
 }
 
+/**
+ * freee からログアウトする
+ */
+function freeeLogout(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
+  const freee = new FreeeClazz();
+  freee.logout();
+  SpreadsheetApp.getActiveSpreadsheet().toast(`freee からログアウトしました`, 'freee');
+}
+
+/**
+ * toggl のプロジェクトとタグの一覧を TOGGL_PROJECTS_TAGS という名前のシートに出力する
+ * @param workplaceId ワークプレイスID
+ */
 function outputTogglProjectTags(workplaceId: number): void { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
     const toggl = new TogglClazz(Props.get('TOGGL_API_TOKEN'));
@@ -134,12 +156,15 @@ function outputTogglProjectTags(workplaceId: number): void { // eslint-disable-l
     activeSpreadSheet.toast(`${sheetName} を出力しました`);
   } catch (error) {
     const user = Session.getTemporaryActiveUserKey();
-    const message = 'Togglのプロジェクト・タグのデータの読み出しでエラーが発生しました。';
+    const message = 'togglのプロジェクト・タグのデータの読み出しでエラーが発生しました。';
     console.error({ user, message, error });
     throw new Error(`${message} \n[${user}]`);
   }
 }
 
+/**
+ * freee の所属する事業所の一覧を取得する
+ */
 function getCompanies(): Array<{id: number, name: string}> { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
     const freee = new FreeeClazz();
@@ -151,12 +176,11 @@ function getCompanies(): Array<{id: number, name: string}> { // eslint-disable-l
     console.error({ user, message, error });
     throw new Error(`${message} \n[${user}]`);
   }
-
 }
 
 /**
- *
- * @param companyId
+ * freee のプロジェクトとタグの一覧を FREEE_PROJECTS_TAGS という名前のシートに出力する
+ * @param companyId 事業所ID
  */
 function outputFreeeProjectTags(companyId: number): void { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
@@ -176,6 +200,10 @@ function outputFreeeProjectTags(companyId: number): void { // eslint-disable-lin
   }
 }
 
+/**
+ *  シートの工数を freee 工数管理を登録する
+ * @param companyId 事業所ID
+ */
 function addTimeEntryFromSheet(companyId: number): void { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
     const freee = new FreeeClazz();
@@ -217,3 +245,14 @@ function hasInvalidProps(): boolean { // eslint-disable-line @typescript-eslint/
   return !Props.isValid();
 }
 
+/**
+ * ダイアログを開く
+ * @param title タイトル
+ * @param content コンテンツ
+ */
+function createModelessDialog(title: string, content: GoogleAppsScript.Base.BlobSource) {
+  const htmlOutput = HtmlService.createHtmlOutput(content)
+    .setWidth(360)
+    .setHeight(120);
+  SpreadsheetApp.getUi().showModelessDialog(htmlOutput, title);
+}

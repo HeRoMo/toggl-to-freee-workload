@@ -118,33 +118,70 @@ interface FreeeWorkloadTag {
 
 export class FreeeClazz {
   private baseURL = 'https://api.freee.co.jp';
-  public readonly service = OAuth2.createService('freeeAPI')
+  private readonly service = OAuth2.createService('freeeAPI')
     .setAuthorizationBaseUrl ('https://accounts.secure.freee.co.jp/public_api/authorize')
     .setTokenUrl('https://accounts.secure.freee.co.jp/public_api/token')
     .setClientId(Props.get('FREEE_CLIENT_ID'))
     .setClientSecret(Props.get('FREEE_CLIENT_SECRET'))
-    .setCallbackFunction ('authCallback')
+    .setCallbackFunction('authCallback')
     .setPropertyStore(PropertiesService.getUserProperties())
     .setCache(CacheService.getUserCache());
 
+  /**
+   * ログイン中なら true を返す
+   */
+  public inLogin(): boolean {
+    return this.service.hasAccess();
+  }
+
+  /**
+   * freee の認証URLを取得する
+   */
+  public getAuthorizationUrl(): string {
+    return this.service.getAuthorizationUrl();
+  }
+
+  /**
+   * freee からのコールバックを処理する
+   * @param request
+   */
+  public handleCallback(request: object): boolean {
+    return this.service.handleCallback(request);
+  }
+
+  /**
+   * freee のログインユーザ情報を取得する
+   */
   public getUser(): FreeeUser {
     const response = this.getRequest('/api/1/users/me');
     const {user} = JSON.parse(response.getContentText());
     return user;
   }
 
+  /**
+   * freee の所属事業所のIDと名前の一覧を取得する
+   */
   public getCompanies(): Array<{id: number, name: string}> {
     const companies = this.fetchCompanies();
     return companies.map((c) => ({id: c.id, name: c.display_name}));
   }
 
+  /**
+   * freee の所属事業所を取得する
+   * @private
+   */
   private fetchCompanies(): FreeeCompany[] {
     const response = this.getRequest('/pm/users/me');
     const {companies} = JSON.parse(response.getContentText());
     return companies;
   }
 
-  public getProjects(companyId: number): FreeeProject[] {
+  /**
+   * freee 工数管理のプロジェクトを取得する
+   * @param companyId freee 事業所ID
+   * @private
+   */
+  private fetchProjects(companyId: number): FreeeProject[] {
     const params = {
       company_id: companyId,
       limit: 100,
@@ -154,8 +191,12 @@ export class FreeeClazz {
     return projects;
   }
 
+  /**
+   * freee のプロジェクトとタグの一覧を取得する
+   * @param companyId freee 事業所ID
+   */
   public getProjectsTags(companyId: number): any[][] { // eslint-disable-line @typescript-eslint/no-explicit-any
-    const projects = this.getProjects(companyId);
+    const projects = this.fetchProjects(companyId);
     const projectTags = projects.map((project)=>{
       return this.parseProject(project);
     });
@@ -184,6 +225,11 @@ export class FreeeClazz {
     return output;
   }
 
+  /**
+   * プロジェクト情報をスプレッドシートに出力しやすい形式に変換する
+   * @param project
+   * @private
+   */
   private parseProject(project: FreeeProject): any[][] { // eslint-disable-line @typescript-eslint/no-explicit-any
     console.log(`${project.id}: ${project.name}`);
     const projectId = project.id;
@@ -205,8 +251,8 @@ export class FreeeClazz {
    * ID を指定して Project を取得する。
    * 実装したものの権限エラーが発生する
    *
-   * @param companyId
-   * @param projectId
+   * @param companyId freee 事業所ID
+   * @param projectId プロジェクトID
    */
   public getProjectById(companyId: number, projectId: number): FreeeProject {
     const params = {
@@ -218,7 +264,11 @@ export class FreeeClazz {
     return project;
   }
 
-
+  /**
+   * スプレッドシートを読み、freee 工数管理に登録する
+   * @param companyId freee 事業所ID
+   * @param sheetName 読み込むシート名
+   */
   public entryWorkloads(companyId: number, sheetName: string): number {
     const spreadSheet = new SpreadsheetUtils(SpreadsheetApp.getActiveSpreadsheet().getId());
     const data = spreadSheet.getSheetAsJson(sheetName);
@@ -246,8 +296,8 @@ export class FreeeClazz {
   }
 
   /**
-   *
-   * @param workloadInput
+   * freee 工数管理でデータを登録する
+   * @param workloadInput 工数データ
    * @private
    */
   private entryWorkload(workloadInput: FreeeWorkloadInput): FreeeWorkload {
@@ -256,10 +306,19 @@ export class FreeeClazz {
     return workload;
   }
 
+  /**
+   * freee 工数管理からログアウトする
+   */
   public logout(): void {
     this.service.reset();
   }
 
+  /**
+   * freee の GET API をコールする
+   * @param path リクエストパス
+   * @param queryParams リクエストボディ
+   * @private
+   */
   private getRequest(
     path: string,
     queryParams: {[key:string]: string|number } = null,
@@ -284,6 +343,12 @@ export class FreeeClazz {
     return response;
   }
 
+  /**
+   * freee の POST API をコールする
+   * @param path リクエストパス
+   * @param body リクエストボディ
+   * @private
+   */
   private postRequest(path: string, body: object): GoogleAppsScript.URL_Fetch.HTTPResponse {
     const url = this.baseURL + path;
     const response = UrlFetchApp.fetch(
@@ -299,88 +364,46 @@ export class FreeeClazz {
   }
 }
 
+/**
+ * freee の OAuth2 のコールバックを処理する
+ * @param request
+ */
 function authCallback(request: object) { // eslint-disable-line @typescript-eslint/no-unused-vars
   const freee = new FreeeClazz();
-  const isAuthorized = freee.service.handleCallback(request);
+  const isAuthorized = freee.handleCallback(request);
   if (isAuthorized) {
-    return HtmlService.createHtmlOutput('Success! You can close this tab.');
+    return HtmlService.createHtmlOutput('freee の認証に成功しました! このタブを閉じてください。');
   } else {
-    return HtmlService.createHtmlOutput('Denied. You can close this tab');
+    return HtmlService.createHtmlOutput('freee の認証に失敗しました。 このタブを閉じてください。');
   }
 }
 
-const Freee = {
-  createModelessDialog(html, title) {
-    const htmlOutput = HtmlService.createHtmlOutput(html)
-      .setWidth(360)
-      .setHeight(120);
-    SpreadsheetApp.getUi().showModelessDialog(htmlOutput, title);
-  },
+// function TestUser_():void { // eslint-disable-line @typescript-eslint/no-unused-vars
+//   const freee = new FreeeClazz();
+//   const user = freee.getUser();
+//   console.log({user});
+// }
+//
+// function TestCompanies():void { // eslint-disable-line @typescript-eslint/no-unused-vars
+//   const freee = new FreeeClazz();
+//   const companies = freee.getCompanies();
+//   console.log({companies});
+// }
 
-  showAuth(): void {
-    const freee = new FreeeClazz();
-    if (!freee.service.hasAccess()) {
-      const authorizationUrl = freee.service.getAuthorizationUrl();
-      const template = HtmlService.createTemplate(
-        '<a href="<?= authorizationUrl ?>" target="_blank">Authorize</a>. ' +
-        'freee APIの認可をします。',
-      );
-      template.authorizationUrl = authorizationUrl;
-      const page = template.evaluate();
-      const title = 'freeeアプリの認可処理';
-
-      this.createModelessDialog(page, title);
-    } else {
-      this.showUser();
-    }
-  },
-
-  showUser(): void { // TODO: code.ts に移動する
-    const freee = new FreeeClazz();
-    const user = freee.getUser();
-    Browser.msgBox('OAuth認可済みです。\\n認可されたユーザー名：' + user.display_name);
-  },
-
-  logout(): void {
-    const freee = new FreeeClazz();
-    freee.logout();
-    const mes = 'freeeアプリからログアウトしました。';
-    const logoutTitle = 'ログアウト終了';
-
-    this.createModelessDialog(mes, logoutTitle);
-  },
-};
-
-export default Freee;
-
-function TestUser_():void { // eslint-disable-line @typescript-eslint/no-unused-vars
-  // const user = Freee.getUser();
-  const freee = new FreeeClazz();
-  const user = freee.getUser();
-  console.log({user});
-}
-
-function TestCompanies():void { // eslint-disable-line @typescript-eslint/no-unused-vars
-  // const user = Freee.getUser();
-  const freee = new FreeeClazz();
-  const companies = freee.getCompanies();
-  console.log({companies});
-}
-
-function TestProj(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
-  const freee = new FreeeClazz();
-  const companyId = 111111;
-  const projectsTags = freee.getProjectsTags(companyId);
-  console.log({count: projectsTags.length, projectsTags: projectsTags});
-  const projects = freee.getProjects(companyId);
-  console.log({count: projects.length, proj: projects});
-  const p = projects[31];
-  console.log(JSON.stringify(p, null, 2));
-  //
-  // console.log({companyId, projId: p.id});
-  // const proj = freee.getProjectById(companyId, p.id);
-  // console.log(JSON.stringify(proj, null, 2));
-}
+// function TestProj(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
+//   const freee = new FreeeClazz();
+//   const companyId = 111111;
+//   const projectsTags = freee.getProjectsTags(companyId);
+//   console.log({count: projectsTags.length, projectsTags: projectsTags});
+//   const projects = freee.fetchProjects(companyId);
+//   console.log({count: projects.length, proj: projects});
+//   const p = projects[31];
+//   console.log(JSON.stringify(p, null, 2));
+//   //
+//   // console.log({companyId, projId: p.id});
+//   // const proj = freee.getProjectById(companyId, p.id);
+//   // console.log(JSON.stringify(proj, null, 2));
+// }
 
 // function TestEntryWL() { // eslint-disable-line @typescript-eslint/no-unused-vars
 //   const entry: FreeeWorkloadInput = {
