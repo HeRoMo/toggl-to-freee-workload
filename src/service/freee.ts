@@ -116,7 +116,7 @@ interface FreeeWorkloadTag {
   tag_name: string;
 }
 
-export class FreeeClazz {
+export class Freee {
   private baseURL = 'https://api.freee.co.jp';
   private readonly service = OAuth2.createService('freeeAPI')
     .setAuthorizationBaseUrl ('https://accounts.secure.freee.co.jp/public_api/authorize')
@@ -369,7 +369,7 @@ export class FreeeClazz {
  * @param request
  */
 function authCallback(request: object) { // eslint-disable-line @typescript-eslint/no-unused-vars
-  const freee = new FreeeClazz();
+  const freee = new Freee();
   const isAuthorized = freee.handleCallback(request);
   if (isAuthorized) {
     return HtmlService.createHtmlOutput('freee の認証に成功しました! このタブを閉じてください。');
@@ -377,48 +377,3 @@ function authCallback(request: object) { // eslint-disable-line @typescript-esli
     return HtmlService.createHtmlOutput('freee の認証に失敗しました。 このタブを閉じてください。');
   }
 }
-
-// function TestUser_():void { // eslint-disable-line @typescript-eslint/no-unused-vars
-//   const freee = new FreeeClazz();
-//   const user = freee.getUser();
-//   console.log({user});
-// }
-//
-// function TestCompanies():void { // eslint-disable-line @typescript-eslint/no-unused-vars
-//   const freee = new FreeeClazz();
-//   const companies = freee.getCompanies();
-//   console.log({companies});
-// }
-
-// function TestProj(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
-//   const freee = new FreeeClazz();
-//   const companyId = 111111;
-//   const projectsTags = freee.getProjectsTags(companyId);
-//   console.log({count: projectsTags.length, projectsTags: projectsTags});
-//   const projects = freee.fetchProjects(companyId);
-//   console.log({count: projects.length, proj: projects});
-//   const p = projects[31];
-//   console.log(JSON.stringify(p, null, 2));
-//   //
-//   // console.log({companyId, projId: p.id});
-//   // const proj = freee.getProjectById(companyId, p.id);
-//   // console.log(JSON.stringify(proj, null, 2));
-// }
-
-// function TestEntryWL() { // eslint-disable-line @typescript-eslint/no-unused-vars
-//   const entry: FreeeWorkloadInput = {
-//     company_id: 111111,
-//     project_id: 222222,
-//     date: '2024-05-24',
-//     minutes: 9,
-//     memo: '作業内容',
-//     // workload_tags: [{
-//     //   tag_group_id: 1,
-//     //   tag_id: 1,
-//     // }],
-//   };
-//
-//   const freee = new FreeeClazz();
-//   const workload = freee.entryWorkload(entry);
-//   console.log({workload});
-// }
