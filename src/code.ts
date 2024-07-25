@@ -1,5 +1,5 @@
-import {TogglClazz} from './service/toggl';
-import {FreeeClazz} from './service/freee';
+import {Toggl} from './service/toggl';
+import {Freee} from './service/freee';
 import SpreadsheetUtils from './SpreadsheetUtils';
 import Props from './props';
 
@@ -53,7 +53,7 @@ function showSettingDialog(): void { // eslint-disable-line @typescript-eslint/n
  */
 function getWorkspaces(): Array<{id: number, name: string}> { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
-    const toggl = new TogglClazz(Props.get('TOGGL_API_TOKEN'));
+    const toggl = new Toggl(Props.get('TOGGL_API_TOKEN'));
     return toggl.getWorkspaces();
   } catch (error) {
     const user = Session.getTemporaryActiveUserKey();
@@ -89,7 +89,7 @@ function fillSheetWithReport( // eslint-disable-line @typescript-eslint/no-unuse
   month: number,
 ) {
   try {
-    const toggl = new TogglClazz(Props.get('TOGGL_API_TOKEN'));
+    const toggl = new Toggl(Props.get('TOGGL_API_TOKEN'));
     const report = toggl.getAllReport(workplaceId, year, month);
     const totalCount = Math.max(report.length - 1, 0); // ヘッダ行を引いておく
     const count = Math.max(report.length - 1, 0); // ヘッダ行を引いておく
@@ -108,7 +108,7 @@ function fillSheetWithReport( // eslint-disable-line @typescript-eslint/no-unuse
  * freee にログインする
  */
 function freeeLogin(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
-  const freee = new FreeeClazz();
+  const freee = new Freee();
   if (!freee.inLogin()) {
     const authorizationUrl = freee.getAuthorizationUrl();
     const template = HtmlService.createTemplate(
@@ -128,7 +128,7 @@ function freeeLogin(): void { // eslint-disable-line @typescript-eslint/no-unuse
  * freee からログアウトする
  */
 function freeeLogout(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
-  const freee = new FreeeClazz();
+  const freee = new Freee();
   freee.logout();
   SpreadsheetApp.getActiveSpreadsheet().toast(`freee からログアウトしました`, 'freee');
 }
@@ -139,7 +139,7 @@ function freeeLogout(): void { // eslint-disable-line @typescript-eslint/no-unus
  */
 function outputTogglProjectTags(workplaceId: number): void { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
-    const toggl = new TogglClazz(Props.get('TOGGL_API_TOKEN'));
+    const toggl = new Toggl(Props.get('TOGGL_API_TOKEN'));
     const tags = toggl.getTags(workplaceId);
     const projects = toggl.getProjects(workplaceId);
     const activeSpreadSheet = SpreadsheetApp.getActiveSpreadsheet();
@@ -167,7 +167,7 @@ function outputTogglProjectTags(workplaceId: number): void { // eslint-disable-l
  */
 function getCompanies(): Array<{id: number, name: string}> { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
-    const freee = new FreeeClazz();
+    const freee = new Freee();
     const companies = freee.getCompanies();
     return companies;
   } catch (error) {
@@ -184,7 +184,7 @@ function getCompanies(): Array<{id: number, name: string}> { // eslint-disable-l
  */
 function outputFreeeProjectTags(companyId: number): void { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
-    const freee = new FreeeClazz();
+    const freee = new Freee();
     const activeSpreadSheet = SpreadsheetApp.getActiveSpreadsheet();
     const sheetName = 'FREEE_PROJECTS_TAGS';
     const ss = new SpreadsheetUtils(activeSpreadSheet.getId());
@@ -206,7 +206,7 @@ function outputFreeeProjectTags(companyId: number): void { // eslint-disable-lin
  */
 function addTimeEntryFromSheet(companyId: number): void { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
-    const freee = new FreeeClazz();
+    const freee = new Freee();
     const sheetName = SpreadsheetApp.getActiveSheet().getName();
     const count = freee.entryWorkloads(companyId, sheetName);
 

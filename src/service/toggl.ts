@@ -1,8 +1,5 @@
-import Props from '../props';
 import Utils from '../utils';
 import SpreadsheetUtils from "../SpreadsheetUtils";
-
-const TOGGL_API_TOKEN: string = 'TOGGL_API_TOKEN';
 
 // Toggl のレポートAPIのレスポンスのJSONの型化
 interface IToggleReportData {
@@ -28,7 +25,7 @@ interface ITimeEntry {
   at: string;
 }
 
-export class TogglClazz {
+export class Toggl {
   private readonly togglKey;
 
   constructor(toggleAPIToken: string) {
@@ -271,13 +268,4 @@ class TogglFreeeMap {
   public get(toggleProjectId: number): {[key: number]: any[]} { // eslint-disable-line @typescript-eslint/no-explicit-any
     return this.tfMap[toggleProjectId];
   }
-}
-
-function Test(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
-  const toggl = new TogglClazz(Props.get(TOGGL_API_TOKEN));
-  // const tags = toggl.getTags(218985);
-  // // const tags = Toggl.getTags(218985);
-  // console.log({tags});
-  const res = toggl.readTogglFreeeMap();
-  console.log({test: res.get(203163206)});
 }
