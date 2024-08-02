@@ -14,7 +14,9 @@
 ```console
 $ git clone https://github.com/HeRoMo/toggl-to-freee-workload.git
 $ cd toggl-to-freee-workload
+$ yarn install 
 $ yarn clasp create --type sheets --rootDir src --title toggl-to-freee-workload
+$ mv src/.clasp.json ./.clasp.json
 $ yarn clasp:push
 ```
 
