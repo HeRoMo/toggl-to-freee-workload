@@ -124,6 +124,11 @@ function freeeLogin(): void { // eslint-disable-line @typescript-eslint/no-unuse
   }
 }
 
+function inLogin(): boolean { // eslint-disable-line @typescript-eslint/no-unused-vars
+  const freee = new Freee();
+  return freee.inLogin();
+}
+
 /**
  * freee からログアウトする
  */
