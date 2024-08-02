@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <base target="_top">
   <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
-  <style type="text/css">
+  <style>
     input { width: 100% }
     input:invalid {
       background-color: #ffbbbb;
@@ -13,7 +13,7 @@
       color: gray;
       background-color: lightgray;
     }
-    div.invisible {
+    button.invisible {
       display: none;
     }
   </style>
@@ -42,14 +42,12 @@
     <p>コピーしてアプリのコールバックURLに設定してください(<a href="https://app.secure.freee.co.jp/developers/applications" target="_blank">freee 開発アプリ一覧</a>)</p>
   </div>
 
-  <div class="block form-group invisible" id="freeInLogin">
-    <button id="freeeLogin" class="fullwidth blue">
+  <div class="block form-group">
+    <button id="freeeLogin" class="fullwidth blue <?=function(){if(inLogin()) return 'invisible'}()?>">
       <span>ログイン</span>
       <span class="loading"></span>
     </button>
-  </div>
-  <div class="block form-group invisible" id="freeInLogout">
-    <button id="freeeLogout" class="fullwidth blue">
+    <button id="freeeLogout" class="fullwidth blue <?=function(){if(!inLogin()) return 'invisible'}()?>">
       <span>ログアウト</span>
       <span class="loading"></span>
     </button>
@@ -73,18 +71,18 @@
 
     function setFreeeButtonVisibility(inLogin) {
       if (inLogin) {
-        document.querySelector('div#freeInLogin').classList.add('invisible')
-        document.querySelector('div#freeInLogout').classList.remove('invisible')
+        document.querySelector('button#freeeLogin').classList.add('invisible')
+        document.querySelector('button#freeeLogout').classList.remove('invisible')
       } else {
-        document.querySelector('div#freeInLogin').classList.remove('invisible')
-        document.querySelector('div#freeInLogout').classList.add('invisible')
+        document.querySelector('button#freeeLogin').classList.remove('invisible')
+        document.querySelector('button#freeeLogout').classList.add('invisible')
       }
     }
 
     function setButtonVisibility() {
       function onFailure() {
-        document.querySelector('div#freeInLogin').classList.add('invisible')
-        document.querySelector('div#freeInLogout').classList.add('invisible')
+        document.querySelector('button#freeeLogin').classList.add('invisible')
+        document.querySelector('button#freeeLogout').classList.add('invisible')
       }
 
       google.script.run
@@ -92,7 +90,6 @@
         .withFailureHandler(onFailure)
         .inLogin();
     }
-    document.addEventListener('DOMContentLoaded', setButtonVisibility)
 
     document.querySelector('button#freeeLogin').addEventListener('click', function(event){
       const target = event.currentTarget;
