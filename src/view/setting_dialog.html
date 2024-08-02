@@ -13,6 +13,9 @@
       color: gray;
       background-color: lightgray;
     }
+    div.invisible {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -26,17 +29,30 @@
 <fieldset>
   <legend>freee 工数管理</legend>
   <div class="block form-group">
-    <label for="CALLBACK_URL">コールバックURL:</label>
-    <input type="text" id="CALLBACK_URL" class="setting" value="https://script.google.com/macros/d/<?=ScriptApp.getScriptId()?>/usercallback" readonly="readonly" style="background-color: ivory">
-    <p>コピーしてアプリのコールバックURLに設定してください(<a href="https://app.secure.freee.co.jp/developers/applications" target="_blank">freee 開発アプリ一覧</a>)</p>
-  </div>
-  <div class="block form-group">
     <label for="FREEE_CLIENT_ID">ClientId: </label>
     <input type="text" id="FREEE_CLIENT_ID" class="setting" pattern="^[0-9a-z]+$" value="<?=Props.get('FREEE_CLIENT_ID')?>">
   </div>
   <div class="block form-group">
     <label for="FREEE_CLIENT_SECRET">ClientSecret:</label>
     <input type="text" id="FREEE_CLIENT_SECRET" class="setting" pattern='^[0-9a-z]+$' value="<?=Props.get('FREEE_CLIENT_SECRET')?>">
+  </div>
+  <div class="block form-group">
+    <label for="CALLBACK_URL">コールバックURL:</label>
+    <input type="text" id="CALLBACK_URL" class="setting" value="https://script.google.com/macros/d/<?=ScriptApp.getScriptId()?>/usercallback" readonly="readonly" style="background-color: ivory">
+    <p>コピーしてアプリのコールバックURLに設定してください(<a href="https://app.secure.freee.co.jp/developers/applications" target="_blank">freee 開発アプリ一覧</a>)</p>
+  </div>
+
+  <div class="block form-group invisible" id="freeInLogin">
+    <button id="freeeLogin" class="fullwidth blue">
+      <span>ログイン</span>
+      <span class="loading"></span>
+    </button>
+  </div>
+  <div class="block form-group invisible" id="freeInLogout">
+    <button id="freeeLogout" class="fullwidth blue">
+      <span>ログアウト</span>
+      <span class="loading"></span>
+    </button>
   </div>
 </fieldset>
 <div class="block form-group bottom-right">
@@ -45,6 +61,76 @@
 </div>
 <script type="text/javascript">
   (function(){
+    function setProcessing(target){
+      target.classList.add('processing');
+      target.disabled=true;
+    }
+
+    function unsetProcessing(target){
+      target.classList.remove('processing')
+      target.disabled=false;
+    }
+
+    function setFreeeButtonVisibility(inLogin) {
+      if (inLogin) {
+        document.querySelector('div#freeInLogin').classList.add('invisible')
+        document.querySelector('div#freeInLogout').classList.remove('invisible')
+      } else {
+        document.querySelector('div#freeInLogin').classList.remove('invisible')
+        document.querySelector('div#freeInLogout').classList.add('invisible')
+      }
+    }
+
+    function setButtonVisibility() {
+      function onFailure() {
+        document.querySelector('div#freeInLogin').classList.add('invisible')
+        document.querySelector('div#freeInLogout').classList.add('invisible')
+      }
+
+      google.script.run
+        .withSuccessHandler(setFreeeButtonVisibility)
+        .withFailureHandler(onFailure)
+        .inLogin();
+    }
+    document.addEventListener('DOMContentLoaded', setButtonVisibility)
+
+    document.querySelector('button#freeeLogin').addEventListener('click', function(event){
+      const target = event.currentTarget;
+      setProcessing(target);
+      function onSuccess(){
+        unsetProcessing(target);
+        setFreeeButtonVisibility(true);
+      }
+      function onFailure(error){
+        const message = 'freee へのログインでエラーが発生しました。'
+        showErrorDialog(message, error);
+        unsetProcessing(target);
+      }
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .freeeLogin();
+      setButtonVisibility();
+    });
+
+    document.querySelector('button#freeeLogout').addEventListener('click', function(event){
+      const target = event.currentTarget;
+      setProcessing(target);
+      function onSuccess(){
+        unsetProcessing(target);
+        setFreeeButtonVisibility(false);
+      }
+      function onFailure(error){
+        const message = 'freee へのログアウトでエラーが発生しました。'
+        showErrorDialog(message, error);
+        unsetProcessing(target);
+      }
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .freeeLogout();
+    });
+
     function saveSettings(event){
       event.currentTarget.disabled=true;
       var props = {}
