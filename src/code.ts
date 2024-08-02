@@ -1,4 +1,5 @@
 import Props from './props';
+import {Freee} from "./service/freee";
 
 const APP_NAME = 'toggl to freee';
 
@@ -65,6 +66,7 @@ function setProps(props: { [key: string]: string }): void { // eslint-disable-li
  * 設定が有効かどうかを判定する
  * @return すべての設定に値がある場合 true。それ以外はfalse
  */
-function hasInvalidProps(): boolean { // eslint-disable-line @typescript-eslint/no-unused-vars
-  return !Props.isValid();
+function hasInvalidSetting(): boolean { // eslint-disable-line @typescript-eslint/no-unused-vars
+  const freee = new Freee();
+  return !(Props.isValid() && freee.inLogin());
 }
