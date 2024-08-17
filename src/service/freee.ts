@@ -1,7 +1,7 @@
 import Props from '../props';
 import SpreadsheetUtils from "../SpreadsheetUtils";
 
-interface FreeeUser {
+export interface FreeeUser {
   id: number;
   email: string;
   display_name: string;
@@ -150,12 +150,15 @@ export class Freee {
   }
 
   /**
-   * freee のログインユーザ情報を取得する
+   * freee のログイン中のユーザ情報を取得する
    */
-  public getUser(): FreeeUser {
-    const response = this.getRequest('/api/1/users/me');
-    const {user} = JSON.parse(response.getContentText());
-    return user;
+  public currentUser(): FreeeUser|null {
+    if (this.inLogin()) {
+      const response = this.getRequest('/api/1/users/me');
+      const {user} = JSON.parse(response.getContentText());
+      return user;
+    }
+    return null;
   }
 
   /**

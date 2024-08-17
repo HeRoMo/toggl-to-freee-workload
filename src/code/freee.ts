@@ -1,4 +1,4 @@
-import {Freee} from '../service/freee';
+import {Freee, FreeeUser} from '../service/freee';
 import SpreadsheetUtils from '../SpreadsheetUtils';
 
 /**
@@ -32,6 +32,14 @@ function inLogin(): boolean { // eslint-disable-line @typescript-eslint/no-unuse
 }
 
 /**
+ * freee のログイン中のユーザ情報を取得する。
+ */
+function currentUser(): FreeeUser|null { // eslint-disable-line @typescript-eslint/no-unused-vars
+  const freee = new Freee();
+  return freee.currentUser();
+}
+
+/**
  * freee にログインする
  */
 function freeeLogin(): void { // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -46,7 +54,7 @@ function freeeLogin(): void { // eslint-disable-line @typescript-eslint/no-unuse
     const content = template.evaluate();
     createModelessDialog(title, content);
   } else {
-    const user = freee.getUser();
+    const user = freee.currentUser();
     SpreadsheetApp.getActiveSpreadsheet().toast(`OAuth認可済みです。認可されたユーザー名：${user.display_name}`, 'freee');
   }
 }

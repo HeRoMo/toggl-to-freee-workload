@@ -13,7 +13,7 @@
       color: gray;
       background-color: lightgray;
     }
-    button.invisible {
+    div.invisible {
       display: none;
     }
   </style>
@@ -43,14 +43,19 @@
   </div>
 
   <div class="block form-group">
-    <button id="freeeLogin" class="fullwidth blue <?=function(){if(inLogin()) return 'invisible'}()?>">
-      <span>ログイン</span>
-      <span class="loading"></span>
-    </button>
-    <button id="freeeLogout" class="fullwidth blue <?=function(){if(!inLogin()) return 'invisible'}()?>">
-      <span>ログアウト</span>
-      <span class="loading"></span>
-    </button>
+    <div id="freeeLogin" class="<?=function(){if(inLogin()) return 'invisible'}()?>">
+      <button id="btnFreeeLogin" class="fullwidth blue">
+        <span>ログイン</span>
+        <span class="loading"></span>
+      </button>
+    </div>
+    <div id="freeeLogout" class="<?=function(){if(!inLogin()) return 'invisible'}()?>">
+      <button id="btnFreeeLogout" class="fullwidth blue">
+        <span>ログアウト</span>
+        <span class="loading"></span>
+      </button>
+      <span id="currentUser"></span>
+    </div>
   </div>
 </fieldset>
 <div class="block form-group bottom-right">
@@ -69,29 +74,30 @@
       target.disabled=false;
     }
 
-    function setFreeeButtonVisibility(inLogin) {
-      if (inLogin) {
-        document.querySelector('button#freeeLogin').classList.add('invisible')
-        document.querySelector('button#freeeLogout').classList.remove('invisible')
+    function setFreeeButtonVisibility(currentUser) {
+      if (currentUser) {
+        document.querySelector('div#freeeLogin').classList.add('invisible');
+        document.querySelector('div#freeeLogout').classList.remove('invisible');
+        document.querySelector('span#currentUser').textContent = `${currentUser.display_name} でログインしています`;
       } else {
-        document.querySelector('button#freeeLogin').classList.remove('invisible')
-        document.querySelector('button#freeeLogout').classList.add('invisible')
+        document.querySelector('div#freeeLogin').classList.remove('invisible');
+        document.querySelector('div#freeeLogout').classList.add('invisible');
       }
     }
 
     function setButtonVisibility() {
       function onFailure() {
-        document.querySelector('button#freeeLogin').classList.add('invisible')
-        document.querySelector('button#freeeLogout').classList.add('invisible')
+        document.querySelector('div#freeeLogin').classList.add('invisible');
+        document.querySelector('div#freeeLogout').classList.add('invisible');
       }
 
       google.script.run
         .withSuccessHandler(setFreeeButtonVisibility)
         .withFailureHandler(onFailure)
-        .inLogin();
+        .currentUser();
     }
 
-    document.querySelector('button#freeeLogin').addEventListener('click', function(event){
+    document.querySelector('button#btnFreeeLogin').addEventListener('click', function(event){
       const target = event.currentTarget;
       setProcessing(target);
       function onSuccess(){
@@ -110,7 +116,7 @@
       setButtonVisibility();
     });
 
-    document.querySelector('button#freeeLogout').addEventListener('click', function(event){
+    document.querySelector('button#btnFreeeLogout').addEventListener('click', function(event){
       const target = event.currentTarget;
       setProcessing(target);
       function onSuccess(){
@@ -147,6 +153,17 @@
         .setProps(props);
     }
     document.querySelector("#save").addEventListener('click', saveSettings);
+
+    document.addEventListener('DOMContentLoaded', function(){
+      function onSuccess(currentUser) {
+        if (currentUser) {
+          document.querySelector('span#currentUser').textContent = `${currentUser.display_name} でログインしています`;
+        }
+      }
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .currentUser();
+    });
   })();
 </script>
 </body>
