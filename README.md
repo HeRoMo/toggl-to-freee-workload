@@ -53,8 +53,15 @@ $ yarn clasp:push
 3. 設定ダイアログが開くので各項目を入力して保存する。
     - Toggle のAPI トークンは toggl track のプロフィールからコピーして入力する
     - **ClientID** と **Client Secret** には先程作成した freee アプリの値を入力する
-    - コールバックURLはコピーして先程の freee アプリのコールバックURLに入力する
+    - コールバックURLはコピーして先程の freee アプリのコールバックURLに入力する<br>
+  ![](doc/settings_initial.png)
 4. 入力したら「保存」する
+5. 再度設定ダイアログを開いて、ログインボタンをクリックする
+6. ダイアログが表示されるので「freeeの認証ページを開く」<br>
+    ![](doc/auth.png)
+7. freee の認証ページで許可して、ブラウザのタブを閉じる
+7. 再度設定ダイアログを開いてログアウトボタンの横にログインユーザが表示されていれば成功ログイン成功<br>
+    ![](doc/settings_inLogin.png)
 
 ### TOGGL_FREEE_MAP シートの作成
 
@@ -84,7 +91,8 @@ $ yarn clasp:push
 ### toggl データの出力
 
 1. togglデータを出力したいシートを選択する
-2. サイドバーを表示し toggl の workspace と 年月を選択して「読み出し」ボタンをクリックする
+2. サイドバーを表示し toggl の workspace と 年月を選択して「読み出し」ボタンをクリックする<br>
+    ![](doc/side-bar.png)
 3. シートに toggl のデータが出力されるので確認する
    - freeeTagGroupId、freeeTagGroupName、freeeTagId、freeeTagName が出力されていない行は toggl データのプロジェクト・タグの組み合わせが間違っているか TOGGL_FREEE_MAP が間違っているので修正する
    - freee工数管理のプロジェクト *[その他]その他業務（開発以外）* はタグがないので空白で構わない
@@ -93,7 +101,6 @@ $ yarn clasp:push
 1. データを確認したらサイドバーの freee工数管理の「工数を登録」をクリックする
    - シートの内容が工数として登録される
 2. [工数 | freee工数管理](https://pm.secure.freee.co.jp/workloads/weekly) で登録した工数を確認する
-
 
 ## Develop 
 ### Push the codes and open in web editor
