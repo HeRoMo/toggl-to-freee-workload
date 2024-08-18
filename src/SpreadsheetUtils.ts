@@ -27,7 +27,7 @@ export class SpreadsheetUtils {
     return json;
   }
 
-  public writeToSheet(sheetName: string, data: any[][]): void {
+  public writeToSheet(sheetName: string, data: any[][]): void { // eslint-disable-line @typescript-eslint/no-explicit-any
     const sheet = this.getOrInsertSheet(sheetName, 0);
     sheet.getDataRange().clear();
     const rowCount = data.length;

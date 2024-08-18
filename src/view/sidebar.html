@@ -5,7 +5,7 @@
   <title>toggl to freee workload</title>
   <base target="_top">
   <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
-  <style type="text/css">
+  <style>
     #workspaces-load {
       display: none;
     }
@@ -37,7 +37,7 @@
 </head>
 <body>
 <div class="sidebar branding-below">
-  <button id="setting" class="fullwidth <?=function(){if(hasInvalidProps()) return 'red'}()?>" style="width: 100%">設定</button>
+  <button id="setting" class="fullwidth <?=function(){if(hasInvalidSetting()) return 'red'}()?>" style="width: 100%">設定</button>
   <fieldset>
     <legend>Toggl</legend>
     <div class="block form-group">
@@ -73,18 +73,6 @@
   <fieldset>
     <legend>freee 工数管理</legend>
     <div class="block form-group">
-      <button id="freeeLogin" class="fullwidth blue">
-        <span>ログイン</span>
-        <span class="loading"></span>
-      </button>
-    </div>
-    <div class="block form-group">
-      <button id="freeeLogout" class="fullwidth blue">
-        <span>ログアウト</span>
-        <span class="loading"></span>
-      </button>
-    </div>
-    <div class="block form-group">
       <label for="company">Company: </label>
       <select id="company"></select>
     </div>
@@ -99,6 +87,9 @@
         <span>工数を登録</span>
         <span class="loading"></span>
       </button>
+    </div>
+    <div class="block form-group" style="text-align: right">
+      <a href="https://pm.secure.freee.co.jp/workloads/weekly" target="_blank">freee 工数管理</a>
     </div>
   </fieldset>
 </div>
@@ -130,6 +121,24 @@
     }
     document.addEventListener('DOMContentLoaded', loadWorkspaces);
     document.querySelector('#workspaces-load').addEventListener('click', loadWorkspaces);
+
+    document.querySelector('button#togglProjectTag').addEventListener('click', function(event){
+      const target = event.currentTarget;
+      setProcessing(target);
+      function onSuccess(){
+        unsetProcessing(target);
+      }
+      function onFailure(error){
+        const message = 'toggl のプロジェクト・タグでエラーが発生しました';
+        showErrorDialog(message, error);
+        unsetProcessing(target);
+      }
+      const workspaceId = document.querySelector('select#workspace').value;
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .outputTogglProjectTags(workspaceId);
+    });
 
     function loadCompanies(){
       function onSuccess(companies){
@@ -199,58 +208,6 @@
         .withFailureHandler(onFailure)
         .fillSheetWithReport(workspaceId, yearMonth[0], yearMonth[1]);
     })
-
-    document.querySelector('button#freeeLogin').addEventListener('click', function(event){
-      const target = event.currentTarget;
-      setProcessing(target);
-      function onSuccess(){
-        unsetProcessing(target);
-      }
-      function onFailure(error){
-        const message = 'freee へのログインでエラーが発生しました。'
-        showErrorDialog(message, error);
-        unsetProcessing(target);
-      }
-      google.script.run
-        .withSuccessHandler(onSuccess)
-        .withFailureHandler(onFailure)
-        .freeeLogin();
-    })
-
-    document.querySelector('button#freeeLogout').addEventListener('click', function(event){
-      const target = event.currentTarget;
-      setProcessing(target);
-      function onSuccess(){
-        unsetProcessing(target);
-      }
-      function onFailure(error){
-        const message = 'freee へのログアウトでエラーが発生しました。'
-        showErrorDialog(message, error);
-        unsetProcessing(target);
-      }
-      google.script.run
-        .withSuccessHandler(onSuccess)
-        .withFailureHandler(onFailure)
-        .freeeLogout();
-    })
-
-    document.querySelector('button#togglProjectTag').addEventListener('click', function(event){
-      const target = event.currentTarget;
-      setProcessing(target);
-      function onSuccess(){
-        unsetProcessing(target);
-      }
-      function onFailure(error){
-        const message = 'toggl のプロジェクト・タグでエラーが発生しました';
-        showErrorDialog(message, error);
-        unsetProcessing(target);
-      }
-      const workspaceId = document.querySelector('select#workspace').value;
-      google.script.run
-        .withSuccessHandler(onSuccess)
-        .withFailureHandler(onFailure)
-        .outputTogglProjectTags(workspaceId);
-    });
 
     document.querySelector('button#freeeProjectTags').addEventListener('click', function(event){
       const target = event.currentTarget;
