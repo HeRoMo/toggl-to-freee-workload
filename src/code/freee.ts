@@ -19,7 +19,7 @@ function outputFreeeProjectTags(companyId: number): void { // eslint-disable-lin
     const user = Session.getTemporaryActiveUserKey();
     const message = 'freee のプロジェクト・タグのデータの読み出しでエラーが発生しました。';
     console.log({error: error});
-    throw new Error(`${message} \n[${user}]`);
+    throw new Error(`${message} \n[${user}]`, {cause: error});
   }
 }
 
@@ -80,7 +80,7 @@ function getCompanies(): Array<{id: number, name: string}> { // eslint-disable-l
     const user = Session.getTemporaryActiveUserKey();
     const message = 'freeeの会社情報取得でエラーが発生しました。';
     console.error({ user, message, error });
-    throw new Error(`${message} \n[${user}]`);
+    throw new Error(`${message} \n[${user}]`, {cause: error});
   }
 }
 
@@ -100,7 +100,7 @@ function addTimeEntryFromSheet(companyId: number): void { // eslint-disable-line
     const user = Session.getTemporaryActiveUserKey();
     const message = 'freee 工数管理の登録でエラーが発生しました。';
     console.log({error: error});
-    throw new Error(`${message} \n[${user}]`);
+    throw new Error(`${message} \n[${user}]`, {cause: error});
   }
 }
 

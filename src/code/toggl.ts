@@ -14,7 +14,7 @@ function getWorkspaces(): Array<{id: number, name: string}> { // eslint-disable-
     const user = Session.getTemporaryActiveUserKey();
     const message = 'Togglのワークスペース取得でエラーが発生しました。';
     console.error({ user, message, error });
-    throw new Error(`${message} \n[${user}]`);
+    throw new Error(`${message} \n[${user}]`, {cause: error});
   }
 }
 
@@ -55,7 +55,7 @@ function fillSheetWithReport( // eslint-disable-line @typescript-eslint/no-unuse
     const user = Session.getTemporaryActiveUserKey();
     const message = 'Togglデータの読み出しでエラーが発生しました。';
     console.error({ user, message, error });
-    throw new Error(`${message} \n[${user}]`);
+    throw new Error(`${message} \n[${user}]`, {cause: error});
   }
 }
 
@@ -84,6 +84,6 @@ function outputTogglProjectTags(workplaceId: number): void { // eslint-disable-l
     const user = Session.getTemporaryActiveUserKey();
     const message = 'togglのプロジェクト・タグのデータの読み出しでエラーが発生しました。';
     console.error({ user, message, error });
-    throw new Error(`${message} \n[${user}]`);
+    throw new Error(`${message} \n[${user}]`, {cause: error});
   }
 }

@@ -1,6 +1,7 @@
 {
   "name": "gas-ts-jest",
   "version": "1.0.0",
+  "private": true,
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -16,7 +17,7 @@
     "@eslint/eslintrc": "^3.0.2",
     "@eslint/js": "^10.0.0",
     "@google/clasp": "3.3.0",
-    "@stylistic/eslint-plugin-ts": "^4.0.0",
+    "@stylistic/eslint-plugin": "^5.0.0",
     "@types/google-apps-script": "2.0.8",
     "@types/jest": "30.0.0",
     "@typescript-eslint/eslint-plugin": "8.59.2",
@@ -33,5 +34,8 @@
   },
   "dependencies": {
     "typescript": "^6.0.0"
+  },
+  "resolutions": {
+    "@typescript-eslint/utils": "8.59.2"
   }
 }
