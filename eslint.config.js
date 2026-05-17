@@ -3,7 +3,7 @@ import googleAppsScriptPlugin from 'eslint-plugin-googleappsscript';
 import importPlugin from 'eslint-plugin-import';
 import jestPlugin from 'eslint-plugin-jest';
 import pluginJs from '@eslint/js';
-import stylisticTsPlugin from '@stylistic/eslint-plugin-ts';
+import stylisticPlugin from '@stylistic/eslint-plugin';
 import tsESLint from 'typescript-eslint';
 import tsESLintParser from '@typescript-eslint/parser'; // eslint-disable-line import/default
 import typescriptESLintPlugin from '@typescript-eslint/eslint-plugin';
@@ -61,7 +61,7 @@ export default [
       googleAppsScript: googleAppsScriptPlugin,
       jest: jestPlugin,
       import: importPlugin,
-      '@stylistic/ts': stylisticTsPlugin,
+      '@stylistic': stylisticPlugin,
     },
     languageOptions: {
       globals: {
@@ -79,9 +79,9 @@ export default [
       'import/newline-after-import': 0,
       'import/no-mutable-exports': 0,
       'import/extensions': ['error', 'ignorePackages', {ts: 'never', js: 'never'}],
-      '@/max-len': ['error', {code: 120, ignoreTrailingComments: true}],
-      '@/comma-dangle': ['error', 'always-multiline'],
-      '@/semi': 'error',
+      '@stylistic/max-len': ['error', {code: 120, ignoreTrailingComments: true}],
+      '@stylistic/comma-dangle': ['error', 'always-multiline'],
+      '@stylistic/semi': 'error',
     },
   },
 ];
