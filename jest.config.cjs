@@ -1,4 +1,4 @@
-/* eslint-disable @/max-len */
+/* eslint-disable @stylistic/max-len */
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
@@ -60,9 +60,6 @@ module.exports = {
 
   // A set of global variables that need to be available in all test environments
   globals: {
-    'ts-jest': {
-      diagnostics: false,
-    },
     SpreadsheetApp: {},
   },
 
@@ -168,9 +165,15 @@ module.exports = {
   // Setting this value to "fake" allows the use of fake timers for functions such as "setTimeout"
   // timers: "real",
 
+  // An array of regexp pattern strings, matched against all test paths, matched tests are skipped
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    'src/service/test.ts',
+  ],
+
   // A map from regular expressions to paths to transformers
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.tsx?$': ['ts-jest', {diagnostics: false}],
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
@@ -190,4 +193,4 @@ module.exports = {
   // Whether to use watchman for file crawling
   // watchman: true,
 };
-/* eslint-enable @/max-len */
+/* eslint-enable @stylistic/max-len */
